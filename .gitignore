@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+cookie.txt
+cookies.json
+.env
+*.log
+watch_state.json
+netcap.jsonl
+deploy_agent.sh
+run_agent.sh
+pwprofile/
+outputs/
+*.webp
+*.mp4
