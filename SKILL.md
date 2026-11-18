@@ -39,6 +39,9 @@ python scripts/ctl.py                       # 交互式发命令（需实例内�
 
 ## 启动（含唯一人工步骤）
 
+**默认零浏览器**：人在 modelscope 页面点启动、拖滑块，本机只用 python scripts/msctl.py 轮询状态。
+start_watch.py 属可选自动化（Playwright/CDP），不用它不影响任何功能。
+
 1. `python scripts/start_watch.py` —— 打开浏览器并自动点「启动」，弹出滑块
 2. 人在窗口里拖一次滑块
 3. 脚本自动轮询，实例 Running 后写 `watch_state.json`（含 `url`）

@@ -56,6 +56,10 @@ GPU  dsw-yyyyyyyy   Stopped   remain=126414s
 
 ### 3) 启动（唯一需要人动手的一步）
 
+**默认方案：零浏览器。** 自己去 modelscope 页面点「启动」拖滑块，然后用 python scripts/msctl.py 轮询状态即可，全程只有 HTTP 请求。
+
+scripts/start_watch.py 是**可选**的自动化脚本（用 Playwright 代点按钮），只有想省一次点击时才用；它含浏览器依赖，不需要就别装 playwright。
+
 ```bash
 python scripts/start_watch.py
 # 浏览器自动打开并点「启动」，滑块弹出后人工拖一下
