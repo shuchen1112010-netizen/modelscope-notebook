@@ -25,7 +25,7 @@ Control **ModelScope (魔搭) Notebook / DSW instances** from a CLI or an MCP cl
 ## 安装
 
 ```bash
-git clone https://github.com/<you>/modelscope-notebook.git
+git clone https://github.com/shuchen1112010-netizen/modelscope-notebook.git
 cd modelscope-notebook
 pip install requests
 ```
