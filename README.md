@@ -129,3 +129,28 @@ Content-Type: application/json
 ## License
 
 MIT
+
+## v4.2 双通道命令架构（2026-11-19）
+
+命令与回执链路升级，不再依赖单一免费服务：
+
+| 通道 | 用途 | 特点 |
+|---|---|---|
+| ntfy | 命令快车道（2s 轮询）+ 回执 | 每 IP 发布限额 250 条/天，仅作加速 |
+| GitHub gist (raw 直读) | 命令备用车道（20s 轮询） | CDN 无 API 限额，`?_=ts` 破缓存 |
+| webhook.site | 回执兜底 | ntfy 连续 3 次发布失败自动转投，uuid 只存本机 |
+
+`agent_dual.py`（云端驻留）：
+- 自读同目录 `agent_dual.env`（模板见 `agent_dual.env.example`）
+- 回执：ntfy 优先，失败自动落 webhook.site
+- 自启动：幂等安装 crontab `@reboot` + `~/.bashrc` 守卫，实例重启自动拉起
+- 心跳：每 15 分钟上报存活（含 uptime 与已见命令数）
+- gist 轮询改 raw.githubusercontent 直读，摆脱匿名 API 60 次/h 限额（该限额按出口 IP 共享，机房 NAT/代理出口下极易耗尽）
+
+一行部署（实例终端执行一次，之后全程序化）：
+
+```bash
+curl -fsSL "https://gist.githubusercontent.com/<uid>/<gist_id>/raw/boot4.sh?v=4" | bash
+```
+
+安全纪律：GitHub token 只留本机（gh auth token），云端零凭证；cookie/.env/.log 均不入库。
