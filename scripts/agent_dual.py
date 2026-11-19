@@ -170,16 +170,20 @@ def poll_gist(first=False):
 
 
 def autostart_install():
-    """幂等自装：crontab @reboot + .bashrc 守卫，实例重启/开终端都能自动拉起。"""
+    """幂等自装：crontab @reboot（可选）+ .bashrc 守卫，实例重启/开终端都能自动拉起。"""
+    d = os.path.dirname(os.path.abspath(__file__))
+    py = sys.executable or "/usr/bin/python3"
+    # crontab 在部分容器里不存在，缺了不影响 bashrc 守卫
     try:
-        d = os.path.dirname(os.path.abspath(__file__))
-        py = sys.executable or "/usr/bin/python3"
         entry = "@reboot sleep 15 && cd %s && %s -u agent_dual.py >> agent_dual.log 2>&1" % (d, py)
         cur = subprocess.run(["crontab", "-l"], capture_output=True, text=True).stdout or ""
         if "agent_dual.py" not in cur:
             subprocess.run(["crontab", "-"], input=(cur.rstrip() + "\n" + entry + "\n"),
                            text=True, capture_output=True)
             log("[autostart] crontab @reboot installed")
+    except Exception as e:
+        log("[autostart] crontab unavailable:", e)
+    try:
         rc_path = os.path.expanduser("~/.bashrc")
         guard = ("pgrep -f agent_dual.py >/dev/null 2>&1 || (cd %s && nohup %s -u agent_dual.py "
                  ">> agent_dual.log 2>&1 &)  # dsh-agent-guard") % (d, py)
@@ -188,7 +192,7 @@ def autostart_install():
             open(rc_path, "a", encoding="utf-8").write("\n" + guard + "\n")
             log("[autostart] bashrc guard installed")
     except Exception as e:
-        log("[autostart] skip:", e)
+        log("[autostart] bashrc skip:", e)
 
 
 def heartbeat():
@@ -202,7 +206,7 @@ def heartbeat():
 
 
 def main():
-    log("[agent v4.1 dual] host=%s ntfy=%s gist=%s poll=%ss wh=%s" %
+    log("[agent v4.3 dual] host=%s ntfy=%s gist=%s poll=%ss wh=%s" %
         (HOST, CMD, GH_GIST or "(off)", GH_POLL, WH_HOOK[:8] or "(off)"))
     # baseline：两条源的历史都登记，不执行
     for fn, label in ((poll_ntfy, "ntfy"), (poll_gist, "gist")):
@@ -213,7 +217,7 @@ def main():
             log("[warn] baseline", label, "fail:", e)
     autostart_install()
     threading.Thread(target=heartbeat, daemon=True).start()
-    post("agent v4.1-dual online: %s" % HOST, title="agent-online", tag="white_check_mark")
+    post("agent v4.3-dual online: %s" % HOST, title="agent-online", tag="white_check_mark")
     while True:
         try:
             k = poll_ntfy()
